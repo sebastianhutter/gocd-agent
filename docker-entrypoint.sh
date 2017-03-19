@@ -14,5 +14,10 @@ unset OUTPUT
 chown go:go /var/go/.ssh/id_rsa
 chmod 0600 /var/go/.ssh/id_rsa
 
+# authenticate against docker hub
+docker login \
+  --username $(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_DOCKER_USER} | jq -r .data.value) \
+  --password $(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_DOCKER_PASS} | jq -r .data.value)
+
 # after configuring the agent execute the original entrypoint
 exec /sbin/my_init
