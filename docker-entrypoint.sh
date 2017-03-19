@@ -10,14 +10,15 @@ ACCESS_TOKEN=$(curl -X POST \
 
 # write the private key file for git
 curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_GITHUB_KEY} | jq -r .data.value > /var/go/.ssh/id_rsa
-unset OUTPUT
 chown go:go /var/go/.ssh/id_rsa
 chmod 0600 /var/go/.ssh/id_rsa
 
 # authenticate against docker hub
-docker login \
-  --username $(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_DOCKER_USER} | jq -r .data.value) \
-  --password $(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_DOCKER_PASS} | jq -r .data.value)
+docker_user=$(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_DOCKER_USER} | jq -r .data.value)
+docker_pass=$(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_DOCKER_PASS} | jq -r .data.value)
+sudo -iu go /bin/bash -c "docker login --username ${docker_user} --password ${docker_pass}"
+unset docker_user
+unset docker_pass
 
 # after configuring the agent execute the original entrypoint
 exec /sbin/my_init
