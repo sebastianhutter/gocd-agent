@@ -15,6 +15,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
   && pip install -r /tmp/gaucho-${GAUCHO_VERSION}/requirements.txt \
   && mv /tmp/gaucho-${GAUCHO_VERSION}/services.py /usr/bin/gaucho.py \
   && chmod +x /usr/bin/gaucho.py \
+  && echo "export RANCHER_URL=" >> /var/go/.bashrc \
   && echo "export RANCHER_ACCESS_KEY=" >> /var/go/.bashrc \
   && echo "export RANCHER_SECRET_KEY=" >> /var/go/.bashrc \
   && rm -rf /var/lib/apt/lists/* /tmp/*

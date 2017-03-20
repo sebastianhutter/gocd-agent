@@ -24,6 +24,7 @@ unset docker_pass
 vault_data=$(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_RANCHER_API})
 access=$(echo $vault_data | jq -r .data.key)
 secret=$(echo $vault_data | jq -r .data.secret)
+sed -i "s/export RANCHER_URL=.*/export RANCHER_URL=${RANCHER_URL}/" /var/go/.bashrc
 sed -i "s/export RANCHER_ACCESS_KEY=.*/export RANCHER_ACCESS_KEY=${access}/" /var/go/.bashrc
 sed -i "s/export RANCHER_SECRET_KEY=.*/export RANCHER_SECRET_KEY=${secret}/" /var/go/.bashrc
 unset vault_data
