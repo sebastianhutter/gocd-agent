@@ -20,5 +20,10 @@ sudo -iu go /bin/bash -c "docker login --username ${docker_user} --password ${do
 unset docker_user
 unset docker_pass
 
+# add the rancher api key and secret into the go users bashrc
+vault_data=$(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_RANCHER_API})
+echo "RANCHER_ACCESS_KEY=$(echo $vault_data | jq -r .data.key) >> /var/go/.bashrc"
+echo "RANCHER_SECRET_KEY=$(echo $vault_data | jq -r .data.secret) >> /var/go/.bashrc"
+
 # after configuring the agent execute the original entrypoint
 exec /sbin/my_init
