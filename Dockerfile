@@ -6,7 +6,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
     $(lsb_release -cs) \
     stable" \
   && apt-get update \
-  && apt-get install -y gettext jq docker-ce build-essential \
+  && apt-get install -y gettext jq docker-ce build-essential httpie \
   && rm -rf /var/lib/apt/lists/*
 
 ADD docker-entrypoint.sh /docker-entrypoint.sh
