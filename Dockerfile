@@ -9,18 +9,25 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
     stable" \
   && apt-get update \
   && apt-get install -y gettext jq docker-ce build-essential httpie python-pip \
-  && cd /tmp \
+  && rm -rf /var/lib/apt/lists/* /tmp/*
+
+# install gaucho script
+RUN /tmp \
   && curl -LO https://github.com/sebastianhutter/gaucho/archive/${GAUCHO_VERSION}.tar.gz \
   && tar xzf ${GAUCHO_VERSION}.tar.gz \
   && pip install -r /tmp/gaucho-${GAUCHO_VERSION}/requirements.txt \
-  && mv /tmp/gaucho-${GAUCHO_VERSION}/services.py /usr/bin/gaucho.py \
-  && chmod +x /usr/bin/gaucho.py \
+  && mv /tmp/gaucho-${GAUCHO_VERSION}/services.py /usr/local/bin/gaucho.py \
+  && chmod +x /usr/local/bin/gaucho.py \
   && echo "export RANCHER_ACCESS_KEY=" >> /var/go/.rancher \
-  && echo "export RANCHER_SECRET_KEY=" >> /var/go/.rancher \
-  && rm -rf /var/lib/apt/lists/* /tmp/*
+  && echo "export RANCHER_SECRET_KEY=" >> /var/go/.rancher
 
-ADD docker-entrypoint.sh /docker-entrypoint.sh
-ADD ssh.config /var/go/.ssh/config
+# install helper scripts
+COPY build/scripts/* /usr/local/bin/
+RUN chmod +x /usr/local/bin/*.sh
+
+# add entrypoint and ssh config
+ADD build/ddocker-entrypoint.sh /docker-entrypoint.sh
+ADD build/ssh.config /var/go/.ssh/config
 RUN chmod +x /docker-entrypoint.sh \
   && chown -R go:go /var/go/.ssh
 
