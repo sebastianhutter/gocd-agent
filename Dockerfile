@@ -27,7 +27,7 @@ COPY build/scripts/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh
 
 # add entrypoint and ssh config
-ADD build/ddocker-entrypoint.sh /docker-entrypoint.sh
+ADD build/docker-entrypoint.sh /docker-entrypoint.sh
 ADD build/ssh.config /var/go/.ssh/config
 RUN chmod +x /docker-entrypoint.sh \
   && chown -R go:go /var/go/.ssh
