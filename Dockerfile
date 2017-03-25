@@ -12,7 +12,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
   && rm -rf /var/lib/apt/lists/*
 
 # install gaucho script
-RUN /tmp \
+RUN cd /tmp \
   && curl -LO https://github.com/sebastianhutter/gaucho/archive/${GAUCHO_VERSION}.tar.gz \
   && tar xzf ${GAUCHO_VERSION}.tar.gz \
   && pip install -r /tmp/gaucho-${GAUCHO_VERSION}/requirements.txt \
