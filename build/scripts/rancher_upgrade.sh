@@ -14,7 +14,7 @@ echo "rancher_deploy.sh: start upgrade"
 # load the environment variables
 service_name=$1
 image_name=$2
-image_version=3
+image_version=$3
 
 [ -z "$service_name" ] && echo "rancher_deploy.sh: please specify service name. aborting." && exit 1
 [ -z "$image_name" ] && echo "rancher_deploy.sh: please specify docker image name. aborting." && exit 1
