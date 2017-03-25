@@ -32,7 +32,7 @@ service_id=$(gaucho.py id_of ${service_name})
 
 # now execute the upgrade
 echo "rancher_deploy.sh: upgrade service ${service_name} (${service_id}) with image ${image_name}:{$image_version}"
-gaucho.py upgrade $(service_id) --imageUuid docker:$(image_name):$(image_version) --auto_complete --timeout 300
+gaucho.py upgrade ${service_id} --imageUuid docker:${image_name}:${image_version} --auto_complete --timeout 300
 # save the return value
 deployment_state=$?
 
