@@ -9,14 +9,14 @@ ACCESS_TOKEN=$(curl -X POST \
      ${VAULT_SERVER}/v1/auth/approle/login | jq -r .auth.client_token)
 
 # write the private key file for git
-curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_GITHUB_KEY} | jq -r .data.value > /var/go/.ssh/id_rsa
-chown go:go /var/go/.ssh/id_rsa
-chmod 0600 /var/go/.ssh/id_rsa
+curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_GITHUB_KEY} | jq -r .data.value > ${GO_HOME}/.ssh/id_rsa
+chown go:go ${GO_HOME}/.ssh/id_rsa
+chmod 0600 ${GO_HOME}/.ssh/id_rsa
 
 # authenticate against docker hub
 docker_user=$(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_DOCKER_USER} | jq -r .data.value)
 docker_pass=$(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_DOCKER_PASS} | jq -r .data.value)
-sudo -iu go /bin/bash -c "docker login --username ${docker_user} --password ${docker_pass}"
+su -l go /bin/sh -c "docker login --username ${docker_user} --password ${docker_pass}"
 unset docker_user
 unset docker_pass
 
@@ -24,13 +24,13 @@ unset docker_pass
 vault_data=$(curl -X GET -H "X-Vault-Token:${ACCESS_TOKEN}" ${VAULT_SERVER}/v1/${VAULT_SECRET_RANCHER_API})
 access=$(echo $vault_data | jq -r .data.key)
 secret=$(echo $vault_data | jq -r .data.secret)
-sed -i "s/export RANCHER_ACCESS_KEY=.*/export RANCHER_ACCESS_KEY=${access}/" /var/go/.rancher
-sed -i "s/export RANCHER_SECRET_KEY=.*/export RANCHER_SECRET_KEY=${secret}/" /var/go/.rancher
-chown go:go /var/go/.rancher
-chmod 0600 /var/go/.rancher
+sed -i "s/export RANCHER_ACCESS_KEY=.*/export RANCHER_ACCESS_KEY=${access}/" ${GO_HOME}/.rancher
+sed -i "s/export RANCHER_SECRET_KEY=.*/export RANCHER_SECRET_KEY=${secret}/" ${GO_HOME}/.rancher
+chown go:go ${GO_HOME}/.rancher
+chmod 0600 ${GO_HOME}/.rancher
 unset vault_data
 unset access
 unset secret
 
 # after configuring the agent execute the original entrypoint
-exec /sbin/my_init
+exec /docker-entrypoint.sh
