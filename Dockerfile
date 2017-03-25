@@ -9,7 +9,7 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
     stable" \
   && apt-get update \
   && apt-get install -y gettext jq docker-ce build-essential httpie python-pip \
-  && rm -rf /var/lib/apt/lists/* /tmp/*
+  && rm -rf /var/lib/apt/lists/*
 
 # install gaucho script
 RUN /tmp \
@@ -19,7 +19,8 @@ RUN /tmp \
   && mv /tmp/gaucho-${GAUCHO_VERSION}/services.py /usr/local/bin/gaucho.py \
   && chmod +x /usr/local/bin/gaucho.py \
   && echo "export RANCHER_ACCESS_KEY=" >> /var/go/.rancher \
-  && echo "export RANCHER_SECRET_KEY=" >> /var/go/.rancher
+  && echo "export RANCHER_SECRET_KEY=" >> /var/go/.rancher \
+  && rm -rf /tmp/*
 
 # install helper scripts
 COPY build/scripts/* /usr/local/bin/
