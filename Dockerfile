@@ -52,6 +52,9 @@ RUN cd /tmp \
   && echo "export RANCHER_SECRET_KEY=" >> ${GOCD_HOME}/.rancher \
   && cd / && rm -rf /tmp/*
 
+# allow go user to access docker stuff
+RUN usermod -a -G docker go
+
 # install helper scripts
 COPY build/scripts/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*.sh

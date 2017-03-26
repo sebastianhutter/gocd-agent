@@ -34,14 +34,12 @@ unset secret
 
 # configure the go agent
 # set the go server url
-# delete the line first and then append the line (sed doesnt like the : in the url)
-sed -i 's/GO_SERVER_URL=.*/d' "${DEFAULTS}"
 echo "GO_SERVER_URL=${GO_SERVER_URL}" >> "${DEFAULTS}"
 
 # set the auto registration key
 if [ -n "${GOCD_AGENTAUTOREGISTERKEY}" ]; then
   mkdir -p "${GOCD_DATA}/config"
-  echo "agent.auto.register.key=${GOCD_AGENTAUTOREGISTERKEY} > ${GOCD_DATA}/config/autoregister.properties"
+  echo "agent.auto.register.key=${GOCD_AGENTAUTOREGISTERKEY}" > "${GOCD_DATA}/config/autoregister.properties"
   chown -R go:go "${GOCD_DATA}/config"
 fi
 
