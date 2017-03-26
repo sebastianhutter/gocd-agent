@@ -34,7 +34,10 @@ unset secret
 
 # configure the go agent
 # set the go server url
-sed -i "s/GO_SERVER_URL=.*/GO_SERVER_URL=${GO_SERVER_URL}/" "${DEFAULTS}"
+# delete the line first and then append the line (sed doesnt like the : in the url)
+sed -i 's/GO_SERVER_URL=.*/d' "${DEFAULTS}"
+echo "GO_SERVER_URL=${GO_SERVER_URL}" >> "${DEFAULTS}"
+
 # set the auto registration key
 if [ -n "${GOCD_AGENTAUTOREGISTERKEY}" ]; then
   mkdir -p "${GOCD_DATA}/config"

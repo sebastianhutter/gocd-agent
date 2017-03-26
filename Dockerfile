@@ -48,8 +48,8 @@ RUN cd /tmp \
   && pip install -r /tmp/gaucho-${GAUCHO_VERSION}/requirements.txt \
   && mv /tmp/gaucho-${GAUCHO_VERSION}/services.py /usr/local/bin/gaucho.py \
   && chmod +x /usr/local/bin/gaucho.py \
-  && echo "export RANCHER_ACCESS_KEY=" >> ${GO_HOME}/.rancher \
-  && echo "export RANCHER_SECRET_KEY=" >> ${GO_HOME}/.rancher \
+  && echo "export RANCHER_ACCESS_KEY=" >> ${GOCD_HOME}/.rancher \
+  && echo "export RANCHER_SECRET_KEY=" >> ${GOCD_HOME}/.rancher \
   && cd / && rm -rf /tmp/*
 
 # install helper scripts
@@ -58,8 +58,8 @@ RUN chmod +x /usr/local/bin/*.sh
 
 # add entrypoint and ssh config
 ADD build/docker-entrypoint.sh /docker-entrypoint.sh
-ADD build/ssh.config ${GO_HOME}/.ssh/config
+ADD build/ssh.config ${GOCD_HOME}/.ssh/config
 RUN chmod +x /docker-entrypoint.sh \
-  && chown -R go:go ${GO_HOME}/.ssh
+  && chown -R go:go ${GOCD_HOME}/.ssh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
