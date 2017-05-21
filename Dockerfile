@@ -53,6 +53,10 @@ RUN cd /tmp \
   && echo "export RANCHER_SECRET_KEY=" >> ${GOCD_HOME}/.rancher \
   && cd / && rm -rf /tmp/*
 
+# install docker compose
+RUN curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose \
+  && chmod +x /usr/local/bin/docker-compose
+
 # allow go user to access docker stuff
 RUN usermod -a -G docker go
 
