@@ -23,7 +23,6 @@ RUN apt-get update \
   && curl -fsSL https://download.docker.com/linux/debian/gpg  | apt-key add - \
   && apt-get update \
   && apt-get install -y gettext jq docker-ce build-essential git httpie python-pip \
-      debootstrap syslinux isolinux squashfs-tools genisoimage memtest86+ rsync \
   && rm -rf /var/lib/apt/lists/*
 
 # install requirements for the gocd agents
