@@ -2,7 +2,7 @@ FROM debian:jessie
 MAINTAINER <mail@sebastian-hutter.ch>
 
 # build arguments
-ARG GOCD_AGENT_VERSION=17.3.0
+ARG GOCD_AGENT_VERSION=17.5.0
 
 # environment variables used for building and entrypoint
 ENV GOCD_DATA=/var/lib/go-agent
