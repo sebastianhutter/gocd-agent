@@ -1,72 +1,31 @@
-FROM debian:jessie
-MAINTAINER <mail@sebastian-hutter.ch>
+FROM gocd/gocd-agent-alpine-3.7:v18.1.0
 
-# build arguments
-ARG GOCD_AGENT_VERSION=17.5.0
+# environment variables
+ENV GOCD_BASE=/godata
+ENV GOCD_CONFIG=${GOCD_BASE}/config
+ENV GOCD_LOGS=${GOCD_BASE}/logs
+ENV GOCD_PIPELINES=${GOCD_BASE}/pipelines
+ENV GOCD_HOME=/home/go
 
-# environment variables used for building and entrypoint
-ENV GOCD_DATA=/var/lib/go-agent
-ENV GOCD_HOME=/var/go
-ENV GOCD_LOG=/var/log/go-agent
-ENV GOCD_SCRIPT=/usr/share/go-agent
-ENV DEFAULTS=/etc/default/go-agent
+ENV APP_PKGS "shadow git curl docker py2-pip py-virtualenv jq make httpie"
+ENV BUILD_PKGS "git curl make gcc g++ autoconf automake gzip libtool linux-headers python2-dev"
 
-# additional scripts etc
-ARG GAUCHO_VERSION=0.0.1
+# install requirements
+RUN apk add --no-cache ${APP_PKGS} \
+  && apk add --no-cache -t buildpkg ${BUILD_PKGS} \
+  && pip install --no-cache-dir --upgrade jinja2-cli[yaml] docker[tls] gnupg pyaml boto3 docker-compose \
+  && ln -s /usr/bin/jinja2 /usr/bin/j2 \
+  && curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o '/tmp/awscli-bundle.zip' \
+  && cd /tmp ; unzip awscli-bundle.zip ; cd awscli-bundle ; ./install -i /usr/local ; cd \
+  && rm -rf /tmp/awscli-bundle /tmp/awscli-bundle.zip \
+  && apk del buildpkg
 
-# install build requirements
-RUN apt-get update \
-  && apt-get install -y apt-transport-https ca-certificates curl software-properties-common \
-  &&  add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian \
-    $(lsb_release -cs) \
-    stable" \
-  && curl -fsSL https://download.docker.com/linux/debian/gpg  | apt-key add - \
-  && apt-get update \
-  && apt-get install -y gettext jq docker-ce build-essential git httpie python-pip \
-  && rm -rf /var/lib/apt/lists/*
-
-# install requirements for the gocd agents
-RUN echo "deb http://ftp.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/backports.list \
- && apt-get update \
- && apt-get install -y curl jq gettext apt-transport-https git \
- && apt-get install -y -t jessie-backports ca-certificates-java openjdk-8-jre-headless \
- && rm -rf /var/lib/apt/lists/*
-
-# install the gocd agent
-# the apt-cache command tries to get the correct debian package version form the
-# specfiied gocd_server_version variable
-RUN echo "deb https://download.gocd.io /" > /etc/apt/sources.list.d/gocd.list \
-  && curl https://download.gocd.io/GOCD-GPG-KEY.asc | apt-key add - \
-  && apt-get update \
-  && apt-get install -y go-agent=$(apt-cache show go-server | grep "Version: ${GOCD_AGENT_VERSION}.*" | head -n 1 | awk '{print $2}') \
-  && rm -rf /var/lib/apt/lists/*
-
-# install gaucho script
-RUN cd /tmp \
-  && curl -LO https://github.com/sebastianhutter/gaucho/archive/${GAUCHO_VERSION}.tar.gz \
-  && tar xzf ${GAUCHO_VERSION}.tar.gz \
-  && pip install -r /tmp/gaucho-${GAUCHO_VERSION}/requirements.txt \
-  && mv /tmp/gaucho-${GAUCHO_VERSION}/services.py /usr/local/bin/gaucho.py \
-  && chmod +x /usr/local/bin/gaucho.py \
-  && echo "export RANCHER_ACCESS_KEY=" >> ${GOCD_HOME}/.rancher \
-  && echo "export RANCHER_SECRET_KEY=" >> ${GOCD_HOME}/.rancher \
-  && cd / && rm -rf /tmp/*
-
-# install docker compose
-RUN curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose \
-  && chmod +x /usr/local/bin/docker-compose
-
-# allow go user to access docker stuff
-RUN usermod -a -G docker go
-
-# install helper scripts
-COPY build/scripts/* /usr/local/bin/
-RUN chmod +x /usr/local/bin/*.sh
-
-# add entrypoint and ssh config
-ADD build/docker-entrypoint.sh /docker-entrypoint.sh
+# add ssh config and entrypoint scripts
+ADD build/docker-entrypoint.d/* /docker-entrypoint.d/
+ADD build/scripts /scripts
 ADD build/ssh.config ${GOCD_HOME}/.ssh/config
-RUN chmod +x /docker-entrypoint.sh \
+# set the correct permissions
+RUN chmod +x /docker-entrypoint.d/* \
+  && chmod +x /scripts/*\
   && chown -R go:go ${GOCD_HOME}/.ssh
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
